@@ -39,3 +39,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Database
+prisma/*.db
+prisma/*.db-journal
+
+# Fonts (if using local fonts)
+public/fonts/*.woff2
+public/fonts/*.woff
+public/fonts/*.ttf
+
+# IDE
+.vscode/
+.idea/
