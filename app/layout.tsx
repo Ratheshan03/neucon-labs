@@ -1,35 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
+import { Navbar } from "@/components/layout/navbar";
+import { Footer } from "@/components/layout/footer";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
-});
-
-const firaCode = localFont({
-  src: [
-    {
-      path: "../public/fonts/FiraCode-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/FiraCode-Medium.woff2",
-      weight: "500",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/FiraCode-Bold.woff2",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-fira-code",
-  display: "swap",
-  fallback: ["monospace"],
 });
 
 export const metadata: Metadata = {
@@ -38,7 +16,7 @@ export const metadata: Metadata = {
   keywords: ["AI development", "ML development", "software development", "SaaS", "Australia", "full-stack", "automation"],
   authors: [{ name: "Neucon Labs" }],
   creator: "Neucon Labs",
-  metadataBase: new URL("https://neuconlabs.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://neuconlabs.com"),
   openGraph: {
     type: "website",
     locale: "en_AU",
@@ -71,9 +49,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${firaCode.variable}`}>
-      <body className="antialiased">
-        {children}
+    <html lang="en" className={inter.variable}>
+      <body className="antialiased min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );
