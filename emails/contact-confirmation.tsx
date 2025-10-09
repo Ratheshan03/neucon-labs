@@ -28,7 +28,7 @@ export const ContactConfirmationEmail = ({
           <Heading style={h1}>Thanks for reaching out!</Heading>
           <Text style={text}>Hi {name},</Text>
           <Text style={text}>
-            We've received your message and will get back to you within 24 hours.
+            We&apos;ve received your message and will get back to you within 24 hours.
           </Text>
           <Section style={messageSection}>
             <Text style={messageLabel}>Your message:</Text>
