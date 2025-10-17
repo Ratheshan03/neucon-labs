@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
-import { Card, CardContent } from "@/components/ui/card"
+import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowRight, ExternalLink, Star } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { animations, initSmoothScroll } from "@/lib/animations"
 
 // Mock data - will be replaced with real data from database
 const featuredProjects = [
@@ -48,6 +49,44 @@ const featuredProjects = [
 export function FeaturedProjectsSection() {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
 
+  useEffect(() => {
+    // Initialize smooth scrolling
+    const lenis = initSmoothScroll()
+
+    // Add parallax effects to vault cards
+    const vaultCards = document.querySelectorAll('.vault-card')
+    vaultCards.forEach((card, index) => {
+      animations.parallax(card as HTMLElement, 0.03 + index * 0.01)
+    })
+
+    // Add scroll-triggered reveals for mobile cards
+    const mobileCards = document.querySelectorAll('.mobile-project-card')
+    animations.staggerReveal(mobileCards, 'up', 0.2)
+
+    // Add scroll-triggered reveals for desktop vault cards
+    const desktopCards = document.querySelectorAll('.desktop-project-card')
+    animations.staggerReveal(desktopCards, 'up', 0.15)
+
+    // Add scroll-triggered reveals for connecting lines
+    const connectingLines = document.querySelectorAll('.connecting-line')
+    animations.staggerReveal(connectingLines, 'up', 0.3)
+
+    // Add scale on scroll for section header
+    const sectionHeader = document.querySelector('.projects-header')
+    if (sectionHeader) {
+      animations.scaleOnScroll(sectionHeader as HTMLElement, 0.9, 1.02)
+    }
+
+    return () => {
+      if (lenis) {
+        lenis.destroy()
+      }
+      if (typeof window !== 'undefined' && ScrollTrigger) {
+        ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+      }
+    }
+  }, [])
+
   return (
     <section className="relative py-32 overflow-hidden">
       {/* Background */}
@@ -60,7 +99,7 @@ export function FeaturedProjectsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-20"
+          className="text-center mb-20 projects-header"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-accent/20 mb-6">
             <Star className="h-4 w-4 text-accent" />
@@ -77,17 +116,103 @@ export function FeaturedProjectsSection() {
           </p>
         </motion.div>
 
-        {/* Projects Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {featuredProjects.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              index={index}
-              isHovered={hoveredId === project.id}
-              onHover={setHoveredId}
+        {/* Vault-Style Hexagonal Projects Grid */}
+        <div className="relative max-w-7xl mx-auto">
+          {/* Mobile: Stack vertically */}
+          <div className="block md:hidden space-y-8">
+            {featuredProjects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group relative mobile-project-card"
+              >
+                <VaultProjectCard
+                  project={project}
+                  index={index}
+                  isHovered={false}
+                />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Desktop: Hexagonal Vault Layout */}
+          <div className="hidden md:block relative">
+            {featuredProjects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, scale: 0.8, rotateY: -15 }}
+                whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
+                viewport={{ once: true }}
+                transition={{
+                  duration: 0.8,
+                  delay: index * 0.2,
+                  type: "spring",
+                  stiffness: 100
+                }}
+                onMouseEnter={() => setHoveredId(project.id)}
+                onMouseLeave={() => setHoveredId(null)}
+                className="group absolute cursor-pointer desktop-project-card vault-card"
+                style={{
+                  top: index === 0 ? '0%' : index === 1 ? '25%' : '50%',
+                  left: index === 0 ? '20%' : index === 1 ? '60%' : '40%',
+                  zIndex: hoveredId === project.id ? 10 : 3 - index,
+                  transform: `translateZ(${hoveredId === project.id ? '50px' : '0px'})`
+                }}
+              >
+                <VaultProjectCard
+                  project={project}
+                  index={index}
+                  isHovered={hoveredId === project.id}
+                />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Connecting Lines */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 600">
+            <defs>
+              <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(59, 130, 246, 0.3)" />
+                <stop offset="50%" stopColor="rgba(147, 51, 234, 0.3)" />
+                <stop offset="100%" stopColor="rgba(16, 185, 129, 0.3)" />
+              </linearGradient>
+            </defs>
+
+            {/* Animated connecting lines */}
+            <motion.path
+              d="M300 100 L700 200"
+              stroke="url(#line-gradient)"
+              strokeWidth="2"
+              fill="none"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: 1 }}
+              transition={{ duration: 2, delay: 0.5 }}
+              className="opacity-60 connecting-line"
             />
-          ))}
+            <motion.path
+              d="M500 350 L700 200"
+              stroke="url(#line-gradient)"
+              strokeWidth="2"
+              fill="none"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: 1 }}
+              transition={{ duration: 2, delay: 0.7 }}
+              className="opacity-60 connecting-line"
+            />
+            <motion.path
+              d="M300 100 L500 350"
+              stroke="url(#line-gradient)"
+              strokeWidth="2"
+              fill="none"
+              initial={{ pathLength: 0 }}
+              whileInView={{ pathLength: 1 }}
+              transition={{ duration: 2, delay: 0.9 }}
+              className="opacity-60 connecting-line"
+            />
+          </svg>
         </div>
 
         {/* CTA */}
@@ -95,8 +220,8 @@ export function FeaturedProjectsSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center"
+          transition={{ duration: 0.6, delay: 1.2 }}
+          className="text-center mt-32"
         >
           <Button
             asChild
@@ -114,153 +239,179 @@ export function FeaturedProjectsSection() {
   )
 }
 
-function ProjectCard({
+function VaultProjectCard({
   project,
   index,
   isHovered,
-  onHover,
 }: {
   project: typeof featuredProjects[0]
   index: number
   isHovered: boolean
-  onHover: (id: number | null) => void
 }) {
-  const mouseX = useMotionValue(0)
-  const mouseY = useMotionValue(0)
-
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), {
-    stiffness: 150,
-    damping: 25,
-  })
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), {
-    stiffness: 150,
-    damping: 25,
-  })
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width - 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5
-    mouseX.set(x)
-    mouseY.set(y)
-  }
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => onHover(project.id)}
-      onMouseLeave={() => {
-        onHover(null)
-        mouseX.set(0)
-        mouseY.set(0)
-      }}
-      className="group perspective-1000"
+      className="relative w-80 h-96"
+      whileHover={{ scale: 1.05 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <Link href={`/projects/${project.slug}`}>
-        <motion.div
-          style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-          className="relative"
+      {/* Hexagonal Vault Card */}
+      <div className="relative w-full h-full flex items-center justify-center">
+        {/* Hexagon Shape */}
+        <motion.svg
+          viewBox="0 0 320 277"
+          className="w-full h-full drop-shadow-2xl"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.3 }}
         >
-          <Card className="relative overflow-hidden border-0 bg-transparent h-full">
-            {/* Animated gradient border */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/30 via-secondary/30 to-accent/30 p-[1px]">
-              <div className="absolute inset-0 rounded-2xl glass" />
-            </div>
+          <defs>
+            <linearGradient id={`vault-gradient-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgba(59, 130, 246, 0.1)" />
+              <stop offset="50%" stopColor="rgba(147, 51, 234, 0.1)" />
+              <stop offset="100%" stopColor="rgba(16, 185, 129, 0.1)" />
+            </linearGradient>
+            <linearGradient id={`vault-border-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="rgb(59, 130, 246)" />
+              <stop offset="50%" stopColor="rgb(147, 51, 234)" />
+              <stop offset="100%" stopColor="rgb(16, 185, 129)" />
+            </linearGradient>
+            <filter id={`vault-glow-${index}`}>
+              <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
 
-            {/* Glow effect on hover */}
+          {/* Hexagon Background */}
+          <motion.path
+            d="M160 0L293.3 80V197L160 277L26.7 197V80L160 0Z"
+            fill={`url(#vault-gradient-${index})`}
+            stroke={`url(#vault-border-${index})`}
+            strokeWidth="3"
+            filter={isHovered ? `url(#vault-glow-${index})` : undefined}
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1, delay: index * 0.2 }}
+          />
+
+          {/* Inner Hexagon for Content */}
+          <path
+            d="M160 30L265 90V167L160 227L55 167V90L160 30Z"
+            fill="rgba(0, 0, 0, 0.8)"
+            stroke="rgba(255, 255, 255, 0.1)"
+            strokeWidth="1"
+          />
+        </motion.svg>
+
+        {/* Content Overlay */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
+          {/* Featured Badge */}
+          {project.featured && (
             <motion.div
-              className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-secondary/20 to-accent/20 blur-xl"
-              animate={{ opacity: isHovered ? 1 : 0 }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 + index * 0.1 }}
+              className="absolute -top-2 -right-2"
+            >
+              <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0 glow-sm px-2 py-1">
+                <Star className="h-3 w-3 mr-1" />
+                Featured
+              </Badge>
+            </motion.div>
+          )}
+
+          {/* Large Letter Background */}
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center opacity-5"
+            animate={{ scale: isHovered ? 1.1 : 1 }}
+            transition={{ duration: 0.3 }}
+          >
+            <span className="text-8xl font-bold text-white">
+              {project.title.charAt(0)}
+            </span>
+          </motion.div>
+
+          {/* Content */}
+          <div className="relative z-10">
+            {/* Metric */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1 }}
+              className="mb-4"
+            >
+              <div className="text-3xl font-bold gradient-text">{project.metric}</div>
+              <div className="text-xs text-muted-foreground uppercase tracking-wide">{project.metricLabel}</div>
+            </motion.div>
+
+            {/* Title */}
+            <motion.h3
+              className="text-xl font-bold mb-3 group-hover:text-primary transition-colors"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + index * 0.1 }}
+            >
+              {project.title}
+            </motion.h3>
+
+            {/* Description */}
+            <motion.p
+              className="text-sm text-muted-foreground mb-4 leading-relaxed"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 + index * 0.1 }}
+            >
+              {project.description}
+            </motion.p>
+
+            {/* Technologies */}
+            <motion.div
+              className="flex flex-wrap justify-center gap-2 mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + index * 0.1 }}
+            >
+              {project.technologies.map((tech) => (
+                <Badge key={tech} variant="outline" className="text-xs border-primary/30 bg-black/50">
+                  {tech}
+                </Badge>
+              ))}
+            </motion.div>
+
+            {/* Hover Details */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{
+                opacity: isHovered ? 1 : 0,
+                scale: isHovered ? 1 : 0.8
+              }}
               transition={{ duration: 0.3 }}
-            />
-
-            <CardContent className="relative p-0 h-full flex flex-col">
-              {/* Project Image Placeholder */}
-              <div className="relative h-56 overflow-hidden rounded-t-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/30 to-accent/30">
-                  {/* Animated grid pattern */}
-                  <div className="absolute inset-0 grid-bg opacity-30" />
-
-                  {/* Large letter */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <motion.div
-                      className="text-9xl font-bold text-white/5"
-                      animate={{ scale: isHovered ? 1.1 : 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {project.title.charAt(0)}
-                    </motion.div>
-                  </div>
-                </div>
-
-                {/* Badges */}
-                <div className="absolute top-4 left-4 flex gap-2">
-                  {project.featured && (
-                    <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0 glow-sm">
-                      <Star className="h-3 w-3 mr-1" />
-                      Featured
-                    </Badge>
-                  )}
-                </div>
-
-                {/* External link icon */}
-                <motion.div
-                  className="absolute top-4 right-4"
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: isHovered ? 1 : 0, scale: isHovered ? 1 : 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="p-2 rounded-lg glass border border-white/20">
-                    <ExternalLink className="h-4 w-4 text-white" />
-                  </div>
-                </motion.div>
-
-                {/* Metric Badge */}
-                <div className="absolute bottom-4 right-4">
-                  <div className="glass px-4 py-2 rounded-xl border border-primary/30">
-                    <div className="text-2xl font-bold gradient-text">{project.metric}</div>
-                    <div className="text-xs text-muted-foreground">{project.metricLabel}</div>
-                  </div>
-                </div>
+              className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm rounded-2xl p-6"
+            >
+              <div className="space-y-3 mb-4">
+                {project.category.map((cat) => (
+                  <Badge key={cat} className="bg-primary/20 text-primary border-primary/30">
+                    {cat}
+                  </Badge>
+                ))}
               </div>
 
-              {/* Content */}
-              <div className="p-6 flex-1 flex flex-col">
-                <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                  {project.title}
-                </h3>
-
-                <p className="text-sm text-muted-foreground mb-4 leading-relaxed line-clamp-2">
-                  {project.description}
-                </p>
-
-                {/* Category Tags */}
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {project.category.map((cat) => (
-                    <Badge key={cat} variant="outline" className="text-xs border-primary/30">
-                      {cat}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* Technologies */}
-                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mt-auto">
-                  {project.technologies.map((tech, i) => (
-                    <span key={tech} className="flex items-center gap-1">
-                      {tech}
-                      {i < project.technologies.length - 1 && <span>•</span>}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </Link>
+              <Button
+                asChild
+                size="sm"
+                variant="ghost"
+                className="text-xs px-4 py-2 hover:bg-primary/20 border border-primary/30"
+              >
+                <Link href={`/projects/${project.slug}`}>
+                  View Project
+                  <ExternalLink className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
+            </motion.div>
+          </div>
+        </div>
+      </div>
     </motion.div>
   )
 }

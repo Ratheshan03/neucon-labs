@@ -1,6 +1,6 @@
 "use client"
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { motion } from "framer-motion"
 import { Code, Brain, Cloud, Workflow, Sparkles } from "lucide-react"
 import { useState } from "react"
 
