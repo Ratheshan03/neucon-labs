@@ -1,19 +1,28 @@
-import { HeroSection } from "@/components/sections/hero-section"
+import { HeroGravity } from "@/components/hero-gravity"
+import { BentoGridV2 } from "@/components/bento-grid-v2"
+import { ManifestoSection } from "@/components/sections/manifesto-section"
+import { ApproachSection } from "@/components/sections/approach-section"
+import { WorkSection } from "@/components/sections/work-section"
 import { ServicesSection } from "@/components/sections/services-section"
-import { FeaturedProjectsSection } from "@/components/sections/featured-projects-section"
-import { WhyChooseSection } from "@/components/sections/why-choose-section"
-import { TechnologiesSection } from "@/components/sections/technologies-section"
-import { CTASection } from "@/components/sections/cta-section"
 
 export default function Home() {
   return (
-    <>
-      <HeroSection />
+    <main className="flex min-h-screen flex-col items-center justify-between">
+      <HeroGravity />
+      <ManifestoSection />
+
+      <div id="about" className="w-full min-h-screen flex items-center justify-center bg-[#050505] border-t border-white/5">
+        <h2 className="text-4xl text-neutral-500">About Us (Coming Soon)</h2>
+      </div>
+
       <ServicesSection />
-      <FeaturedProjectsSection />
-      <WhyChooseSection />
-      <TechnologiesSection />
-      <CTASection />
-    </>
+
+      <ApproachSection />
+
+      <WorkSection />
+
+      {/* Spacer for footer visibility */}
+      <div className="h-24" />
+    </main>
   )
 }

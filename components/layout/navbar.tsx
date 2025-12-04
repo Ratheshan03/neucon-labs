@@ -2,258 +2,186 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
-import { useState, useEffect, useRef } from "react"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { useState, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { NeuconLogo } from "@/components/ui/neucon-logo"
 
 const navigation = [
-  { name: "Services", href: "/services" },
-  { name: "Projects", href: "/projects" },
-  { name: "About", href: "/about" },
+  { name: "About", href: "#about" },
+  { name: "Services", href: "#services" },
+  { name: "Approach", href: "#approach" },
+  { name: "Work", href: "#work" },
   { name: "Contact", href: "/contact" },
 ]
 
+const TextReveal = ({ children, isActive, isHovered }: { children: string, isActive: boolean, isHovered: boolean }) => {
+  return (
+    <div className="relative overflow-hidden h-[20px] flex items-center">
+      <motion.div
+        initial={false}
+        animate={{ y: isHovered ? "-100%" : "0%" }}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className="flex flex-col"
+      >
+        <span className={cn("block h-[20px] flex items-center", isActive ? "text-black" : "text-neutral-400")}>{children}</span>
+        <span className={cn("block h-[20px] flex items-center absolute top-full", isActive ? "text-black" : "text-white")}>{children}</span>
+      </motion.div>
+    </div>
+  )
+}
+
 export function Navbar() {
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
-  const [activeItem, setActiveItem] = useState<string | null>(null)
-  const navRef = useRef<HTMLElement>(null)
-
-  const { scrollY } = useScroll()
-  const backgroundOpacity = useTransform(scrollY, [0, 100], [0, 0.8])
-  const borderOpacity = useTransform(scrollY, [0, 100], [0, 0.1])
+  const [scrolled, setScrolled] = useState(false)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [activeSection, setActiveSection] = useState<string>("")
 
   useEffect(() => {
     const handleScroll = () => {
-      // Scroll handling is now done via useTransform
+      setScrolled(window.scrollY > 100) // Trigger navbar collapse after 100px
+
+      // Scroll Spy
+      const sections = navigation.map(n => n.href.substring(1)).filter(h => h !== "contact")
+      let current = ""
+      for (const section of sections) {
+        const element = document.getElementById(section)
+        if (element) {
+          const rect = element.getBoundingClientRect()
+          // Section is active if its top is within the upper half of the viewport
+          // OR if it covers the middle of the screen
+          if (rect.top <= window.innerHeight * 0.5 && rect.bottom >= window.innerHeight * 0.5) {
+            current = "#" + section
+          }
+        }
+      }
+      setActiveSection(current)
     }
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const handleScrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#")) {
+      e.preventDefault()
+      const element = document.getElementById(href.substring(1))
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" })
+      }
+    }
+  }
+
   return (
-    <motion.header
-      ref={navRef}
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="fixed top-0 left-0 right-0 z-50"
-    >
-      {/* Background with blur effect */}
-      <motion.div
-        style={{ opacity: backgroundOpacity }}
-        className="absolute inset-0 bg-black/80 backdrop-blur-xl"
-      />
+    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-6 pointer-events-none">
+      <div className="max-w-[1400px] mx-auto px-6 flex items-center justify-between relative pointer-events-auto">
 
-      {/* Subtle border */}
-      <motion.div
-        style={{ opacity: borderOpacity }}
-        className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
-      />
-
-      <nav className="relative container flex items-center justify-between py-4 md:py-6">
         {/* Logo */}
-        <Link href="/" className="group relative z-10">
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="relative"
-          >
-            {/* Two-tone logo effect */}
-            <div className="relative">
-              <span className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-white via-white to-white/80 bg-clip-text text-transparent">
-                Neucon Labs
-              </span>
-              {/* Subtle glow effect */}
-              <div className="absolute inset-0 text-2xl md:text-3xl font-bold bg-gradient-to-r from-electric-blue/20 via-neon-purple/20 to-matrix-green/20 bg-clip-text text-transparent blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                Neucon Labs
-              </div>
-            </div>
+        <motion.div
+          animate={{ opacity: scrolled ? 0 : 1, x: scrolled ? -20 : 0 }}
+          transition={{ duration: 0.3 }}
+          className="relative z-10"
+        >
+          <Link href="/" className="group">
+            <NeuconLogo size="md" className="text-3xl md:text-4xl" />
+          </Link>
+        </motion.div>
 
-            {/* Animated underline */}
+        {/* Centered Navigation Pill */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex justify-center items-center">
+
+          {/* Dot Outside - Shows when NO section is active (even if scrolled) */}
+          {!activeSection && (
             <motion.div
-              className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-electric-blue via-neon-purple to-matrix-green"
-              initial={{ scaleX: 0 }}
-              whileHover={{ scaleX: 1 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              style={{ originX: 0 }}
+              layoutId="nav-bg"
+              className="absolute -left-8 w-3 h-3 rounded-full z-0 shadow-lg"
+              style={{
+                background: "radial-gradient(circle at 30% 30%, #ff8f6b 0%, #ff6b35 50%, #c2410c 100%)",
+                boxShadow: "0 2px 10px rgba(255, 107, 53, 0.3)"
+              }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
             />
-          </motion.div>
-        </Link>
+          )}
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center space-x-1">
-          {navigation.map((item, index) => (
-            <motion.div
-              key={item.href}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative"
-              onHoverStart={() => setActiveItem(item.href)}
-              onHoverEnd={() => setActiveItem(null)}
-            >
-              <Link
-                href={item.href}
-                className={cn(
-                  "relative px-5 py-3 text-sm font-medium transition-all duration-300 rounded-full",
-                  "hover:text-white group",
-                  pathname === item.href
-                    ? "text-white"
-                    : "text-white/70 hover:text-white"
-                )}
-              >
-                <span className="relative z-10">{item.name}</span>
-
-                {/* Background hover effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-electric-blue/10 via-neon-purple/10 to-matrix-green/10 rounded-full"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{
-                    opacity: activeItem === item.href ? 1 : 0,
-                    scale: activeItem === item.href ? 1 : 0.8
-                  }}
-                  transition={{ duration: 0.2 }}
-                />
-
-                {/* Active indicator */}
-                {pathname === item.href && (
-                  <motion.div
-                    layoutId="navbar-active"
-                    className="absolute inset-0 bg-gradient-to-r from-electric-blue/20 to-neon-purple/20 rounded-full border border-electric-blue/30"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-
-                {/* Subtle glow on hover */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-electric-blue/20 to-neon-purple/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  animate={{ opacity: activeItem === item.href ? 0.3 : 0 }}
-                />
-              </Link>
-            </motion.div>
-          ))}
-
-          {/* CTA Button */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+          <motion.nav
+            animate={{
+              backgroundColor: scrolled ? "rgba(17, 17, 17, 0.8)" : "rgba(17, 17, 17, 0)",
+              backdropFilter: scrolled ? "blur(12px)" : "blur(0px)",
+              borderColor: scrolled ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0)",
+              padding: scrolled ? "4px 4px" : "0px",
+              borderRadius: "9999px"
+            }}
+            className="flex items-center transition-all duration-300 relative"
           >
-            <Button
-              asChild
-              className="relative ml-6 px-8 py-3 text-sm font-semibold overflow-hidden rounded-full bg-gradient-to-r from-electric-blue to-neon-purple hover:shadow-2xl hover:shadow-electric-blue/50 transition-all duration-300 group"
-            >
-              <Link href="/contact">
-                <span className="relative z-10 flex items-center gap-2">
-                  Get Started
-                  <motion.div
-                    animate={{ x: [0, 4, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    →
-                  </motion.div>
-                </span>
+            {navigation.map((item) => {
+              const isActive = activeSection === item.href || pathname === item.href
+              const isHovered = hoveredItem === item.href
+              const isContact = item.name === "Contact"
 
-                {/* Button glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-neon-purple to-matrix-green opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={(e) => handleScrollTo(e, item.href)}
+                  onMouseEnter={() => setHoveredItem(item.href)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={cn(
+                    "relative px-5 py-2 text-sm font-medium transition-colors rounded-full flex items-center overflow-hidden z-10",
+                    isContact && !scrolled && "bg-[#222] text-white ml-2 px-6"
+                  )}
+                >
+                  {/* Active Background (Orange Pill) - Only when section is active */}
+                  {/* Shares layoutId with the outside dot for smooth morphing */}
+                  {(isActive) && !isContact && (
+                    <motion.div
+                      layoutId="nav-bg"
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: "#ff6b35", // Flat orange for the pill background
+                      }}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
 
-                {/* Animated border */}
-                <motion.div
-                  className="absolute inset-0 rounded-full border-2 border-transparent bg-gradient-to-r from-electric-blue to-neon-purple bg-clip-border opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                />
-              </Link>
-            </Button>
-          </motion.div>
+                  {/* Hover Background (Subtle White) - Only when NOT scrolled (Top State) */}
+                  {(isHovered) && !isActive && !isContact && !scrolled && (
+                    <motion.div
+                      layoutId="nav-hover-top"
+                      className="absolute inset-0 bg-white/10 rounded-full -z-10"
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+
+                  {/* Text Container */}
+                  <div className="relative z-10">
+                    <TextReveal isActive={isActive && scrolled} isHovered={isHovered}>
+                      {item.name}
+                    </TextReveal>
+                  </div>
+                </Link>
+              )
+            })}
+          </motion.nav>
         </div>
 
-        {/* Mobile Navigation */}
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild className="lg:hidden">
-            <motion.div
-              whileTap={{ scale: 0.95 }}
-              className="relative z-10 p-2 rounded-full bg-white/5 hover:bg-white/10 transition-colors duration-300"
-            >
-              <motion.div
-                animate={isOpen ? "open" : "closed"}
-                variants={{
-                  open: { rotate: 180 },
-                  closed: { rotate: 0 }
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                {isOpen ? (
-                  <X className="h-6 w-6 text-white" />
-                ) : (
-                  <Menu className="h-6 w-6 text-white" />
-                )}
-              </motion.div>
-            </motion.div>
-          </SheetTrigger>
-
-          <SheetContent
-            side="right"
-            className="w-full sm:w-[400px] bg-black/95 backdrop-blur-xl border-l border-white/10"
+        {/* Right Side - Email */}
+        <motion.div
+          animate={{ opacity: scrolled ? 0 : 1, x: scrolled ? 20 : 0 }}
+          transition={{ duration: 0.3 }}
+          className="hidden md:flex items-center"
+        >
+          <Link
+            href="mailto:hello@neuconlabs.com"
+            className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
           >
-            <motion.nav
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col gap-8 mt-8"
-            >
-              <Link
-                href="/"
-                className="text-2xl font-bold gradient-text mb-4"
-                onClick={() => setIsOpen(false)}
-              >
-                Neucon Labs
-              </Link>
+            Email us
+          </Link>
+        </motion.div>
 
-              <div className="flex flex-col gap-4">
-                {navigation.map((item, index) => (
-                  <motion.div
-                    key={item.href}
-                    initial={{ opacity: 0, x: 30 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
-                    <Link
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={cn(
-                        "text-lg font-medium transition-all py-4 px-6 rounded-2xl border border-transparent hover:border-white/20",
-                        pathname === item.href
-                          ? "text-white bg-gradient-to-r from-electric-blue/10 to-neon-purple/10 border-electric-blue/30"
-                          : "text-white/70 hover:text-white hover:bg-white/5"
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  </motion.div>
-                ))}
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                  className="mt-8"
-                >
-                  <Button asChild className="w-full bg-gradient-to-r from-electric-blue to-neon-purple hover:shadow-lg hover:shadow-electric-blue/50">
-                    <Link href="/contact" onClick={() => setIsOpen(false)}>
-                      Get Started
-                    </Link>
-                  </Button>
-                </motion.div>
-              </div>
-            </motion.nav>
-          </SheetContent>
-        </Sheet>
-      </nav>
-    </motion.header>
+        {/* Mobile Menu Toggle */}
+        <button className="md:hidden text-white">
+          Menu
+        </button>
+      </div>
+    </header>
   )
 }

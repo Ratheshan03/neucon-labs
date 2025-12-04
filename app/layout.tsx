@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { CustomCursor } from "@/components/ui/custom-cursor";
+import { MagneticCursor } from "@/components/ui/magnetic-cursor";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -52,7 +52,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased min-h-screen flex flex-col">
-        <CustomCursor />
+        <MagneticCursor />
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
