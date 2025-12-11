@@ -56,10 +56,10 @@ function WaveIcon({ item, index, total }: { item: typeof baseIcons[0], index: nu
                 y: [20, -20, 20],
             }}
             transition={{
-                duration: 4,
+                duration: 5,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: -index * 0.3, // Negative delay creates the immediate "snake" wave pattern
+                delay: -index * 0.3, // Tighter delay for a smoother "snake" flow
             }}
             className="flex-shrink-0 px-2 md:px-4"
         >
@@ -297,6 +297,21 @@ function StickyScroll() {
                         <LiquidTab title={stickyContent[1].tab} progress={p2} targetRef={ref2} />
                         <LiquidTab title={stickyContent[2].tab} progress={p3} targetRef={ref3} />
                     </div>
+
+                    {/* Redirection to Full About Page */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 1 }}
+                        className="mt-12"
+                    >
+                        <a href="/about" className="group flex items-center gap-4 text-neutral-400 hover:text-white transition-colors cursor-pointer">
+                            <span className="text-sm font-medium tracking-widest uppercase">Read Our Full Story</span>
+                            <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-orange-500 group-hover:border-orange-500 transition-all duration-300">
+                                <Rocket className="w-4 h-4 text-white transform group-hover:rotate-45 transition-transform" />
+                            </div>
+                        </a>
+                    </motion.div>
                 </div>
 
                 {/* Right Column - Scrolling */}

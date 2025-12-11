@@ -5,11 +5,16 @@ import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 import { ArrowUpRight } from "lucide-react"
 import { NeuconLogo } from "@/components/ui/neucon-logo"
+import { usePathname } from "next/navigation"
 
 export function Footer() {
+  const pathname = usePathname()
   const containerRef = useRef<HTMLDivElement>(null)
+
+  const isAbout = pathname === "/about"
+
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isAbout ? undefined : containerRef,
     offset: ["start end", "end end"]
   })
 
