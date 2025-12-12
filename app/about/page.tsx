@@ -22,7 +22,7 @@ function AboutHero() {
   // Parallax values
   const backgroundScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.25])
   const opacity = useTransform(scrollYProgress, [0, 0.4], [1, 0])
-  const yText = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
+  const yText = useTransform(scrollYProgress, [0, 1], ["0%", "0%"])
 
   return (
     <section ref={scrollRef} className="relative min-h-screen flex flex-col items-center justify-center bg-[#050505] pt-24 md:pt-32 pb-12">
@@ -104,14 +104,12 @@ function AboutHero() {
   )
 }
 
-// --- Story Section (Graphics) ---
+// --- Story Section (Refined) ---
 
 function OriginGraphic() {
   return (
     <div className="w-full h-full relative flex items-center">
-      {/* Timeline Track */}
       <div className="w-full h-[1px] bg-white/10 relative overflow-hidden">
-        {/* Moving Beam */}
         <motion.div
           animate={{ x: ["-100%", "100%"] }}
           transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
@@ -119,7 +117,6 @@ function OriginGraphic() {
         />
       </div>
 
-      {/* Nodes */}
       {[0.2, 0.5, 0.8].map((pos, i) => (
         <div key={i} className="absolute w-2 h-2 bg-neutral-800 border border-white/20 rounded-full" style={{ left: `${pos * 100}%` }}>
           <motion.div
@@ -130,7 +127,6 @@ function OriginGraphic() {
         </div>
       ))}
 
-      {/* Labels */}
       <div className="absolute top-1/2 mt-4 left-[20%] text-[10px] uppercase tracking-widest text-neutral-500">Inception</div>
       <div className="absolute top-1/2 mt-4 left-[50%] text-[10px] uppercase tracking-widest text-neutral-500">Launch</div>
       <div className="absolute top-1/2 mt-4 left-[80%] text-[10px] uppercase tracking-widest text-neutral-500">Scale</div>
@@ -140,39 +136,50 @@ function OriginGraphic() {
 
 function VisionGraphic() {
   return (
-    <div className="w-full h-full relative flex items-end pb-4 pl-4">
-      {/* Grid Lines */}
-      <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-4 opacity-10">
+    <div className="w-full h-full relative flex items-center justify-center p-4">
+      {/* Chart Grid */}
+      <div className="absolute inset-4 grid grid-cols-4 grid-rows-4 gap-4 opacity-10">
         {[...Array(16)].map((_, i) => <div key={i} className="border-[0.5px] border-white/20" />)}
       </div>
 
-      {/* Animated Chart Line (SVG) */}
+      {/* SVG Chart */}
       <svg className="w-full h-3/4 overflow-visible" viewBox="0 0 100 50" preserveAspectRatio="none">
         <motion.path
-          d="M0,50 C20,50 30,30 50,30 C70,30 80,0 100,0"
+          d="M0,50 C20,50 40,30 60,30 S80,0 100,0"
           fill="none"
-          stroke="url(#gradient)"
-          strokeWidth="0.5"
+          stroke="#f97316" /* Orange-500 */
+          strokeWidth="0.8"
+          strokeDasharray="1 0"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
+        />
+        {/* Trailing fade line */}
+        <motion.path
+          d="M0,50 C20,50 40,30 60,30 S80,0 100,0"
+          fill="none"
+          stroke="#f97316"
+          strokeWidth="2"
+          strokeOpacity="0.2"
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatType: "loop", repeatDelay: 1 }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
         />
-        <defs>
-          <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="transparent" />
-            <stop offset="50%" stopColor="#f97316" /> {/* Orange-500 */}
-            <stop offset="100%" stopColor="#ea580c" />
-          </linearGradient>
-        </defs>
       </svg>
 
-      {/* Floating Target Node */}
+      {/* Fixed Target Node (Top Right) */}
       <motion.div
-        animate={{ y: [-5, 5, -5] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-0 right-0 w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/50 flex items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.3)]"
+        // Positioned relative to the SVG coordinates roughly (top right corner of container)
+        className="absolute top-[15%] right-[5%]"
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ duration: 2, repeat: Infinity }}
       >
-        <Target className="w-4 h-4 text-orange-500" />
+        <div className="relative flex items-center justify-center w-8 h-8">
+          <div className="absolute inset-0 bg-orange-500/20 rounded-full animate-ping" />
+          <div className="relative z-10 w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.5)]">
+            <Target className="w-4 h-4 text-orange-500" />
+          </div>
+        </div>
       </motion.div>
     </div>
   )
@@ -214,15 +221,16 @@ function StorySection() {
       <div className="container mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-auto lg:h-[500px]">
 
-          {/* Card 1: The Origin */}
+          {/* Card 1: The Origin (White Glow) */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
+            whileHover={{ scale: 1.02 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="group relative p-[1px] rounded-[2.5rem] bg-gradient-to-b from-white/10 to-transparent hover:from-orange-500/50 hover:to-orange-500/10 transition-colors duration-500"
+            transition={{ duration: 0.5 }}
+            // Group allows inner elements to react too
+            className="group relative rounded-[2.5rem] p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-white/40 hover:to-white/10 transition-colors duration-500 shadow-lg hover:shadow-[0_0_30px_-5px_rgba(255,255,255,0.1)]"
           >
-            {/* Card Content Wrapper */}
             <div className="relative h-full w-full bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden flex flex-col justify-between p-8 md:p-12">
               <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
 
@@ -242,13 +250,14 @@ function StorySection() {
             </div>
           </motion.div>
 
-          {/* Card 2: The Vision */}
+          {/* Card 2: The Vision (Orange Glow) */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
+            whileHover={{ scale: 1.02 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="group relative p-[1px] rounded-[2.5rem] bg-gradient-to-b from-white/10 to-transparent hover:from-orange-500/50 hover:to-orange-500/10 transition-colors duration-500"
+            transition={{ duration: 0.5 }}
+            className="group relative rounded-[2.5rem] p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-orange-500/40 hover:to-orange-500/10 transition-colors duration-500 shadow-lg hover:shadow-[0_0_30px_-5px_rgba(234,88,12,0.15)]"
           >
             <div className="relative h-full w-full bg-[#0a0a0a] rounded-[2.5rem] overflow-hidden flex flex-col justify-between p-8 md:p-12">
               <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay" />
@@ -272,7 +281,6 @@ function StorySection() {
         </div>
       </div>
 
-      {/* Section Outro */}
       <div className="container mx-auto px-6 md:px-12 mt-16 md:mt-24 text-center">
         <p className="text-sm text-neutral-600 uppercase tracking-widest font-medium">
           The best is yet to come.
@@ -282,7 +290,8 @@ function StorySection() {
   )
 }
 
-// --- Principles Section ---
+
+// --- Principles Section (Sticky Card V7.3) ---
 const principles = [
   {
     title: "Lived Experience",
@@ -302,39 +311,126 @@ const principles = [
   }
 ]
 
-function PrinciplesSection() {
-  return (
-    <section className="bg-[#050505] text-white py-24 md:py-32 relative">
-      <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row">
-        <div className="w-full md:w-1/2 md:pr-12 mb-12 md:mb-0">
-          <div className="sticky top-32">
-            <h2 className="text-6xl md:text-8xl tracking-tight leading-[0.9] mb-8">
-              Our <br />
-              <span className="italic text-neutral-500">Principles</span>
-            </h2>
-            <a href="#contact" className="inline-flex items-center justify-center px-8 py-4 bg-white text-black rounded-full font-medium hover:bg-orange-500 hover:text-white transition-all duration-300 active:scale-95 group">
-              <span>Start a Project</span>
-              <ArrowUpRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-            </a>
-          </div>
-        </div>
 
-        <div className="w-full md:w-1/2 flex flex-col gap-24 md:pt-32">
-          {principles.map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="border-t border-white/10 pt-8"
-            >
-              <h3 className="text-4xl md:text-5xl mb-6 text-white">{item.title}</h3>
-              <p className="text-xl md:text-2xl text-neutral-400 leading-relaxed max-w-lg">
-                {item.description}
+
+
+function PrinciplesGraphic() {
+  return (
+    <div className="w-full h-48 relative flex items-center justify-center gap-8 overflow-hidden rounded-3xl bg-neutral-900/50 border border-white/5 group px-8">
+      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
+
+      {/* Left: The Graphic (HUD / Orbitals) */}
+      <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 flex items-center justify-center">
+        {/* Internal Glow */}
+        <div className="absolute w-full h-full bg-orange-500/20 rounded-full blur-2xl animate-pulse" />
+
+        {/* Ring 1: Dashed Outer */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, ease: "linear", repeat: Infinity }}
+          className="absolute inset-0 rounded-full border border-white/10 border-dashed"
+        />
+
+        {/* Ring 2: Counter Rotating Arcs */}
+        <svg className="absolute inset-0 w-full h-full animate-spin-slow" viewBox="0 0 100 100" style={{ animationDuration: '15s', animationDirection: 'reverse' }}>
+          <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.2)" strokeWidth="1" fill="none" strokeDasharray="60 40" />
+        </svg>
+
+        {/* Ring 3: Core Pulse */}
+        <motion.div
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute w-12 h-12 bg-orange-500 rounded-full mix-blend-screen opacity-80"
+        />
+
+        {/* Central Dot */}
+        <div className="absolute w-2 h-2 bg-white rounded-full z-10" />
+      </div>
+
+      {/* Right: Text Content */}
+      <div className="flex flex-col z-10 relative">
+        <motion.span
+          initial={{ opacity: 0, x: 20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-white font-bold italic text-xl md:text-3xl tracking-tighter uppercase leading-none"
+        >
+          THE <span className="text-neutral-500">INVISIBLE</span> <br /> BACKBONE
+        </motion.span>
+      </div>
+    </div>
+  )
+}
+
+function PrinciplesSection() {
+  const containerRef = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  })
+
+  // Animation: Right column translates 'up' fully as we scroll 'down'
+  // Animation: Right column translates 'up' fully as we scroll 'down'
+  // Modified to -55% so it unsticks as soon as the graphic is revealed
+  const yRight = useTransform(scrollYProgress, [0, 1], ["0%", "-55%"])
+
+  // Removed opacity fade to allow smooth "scroll up" exit
+
+  return (
+    // Height 200vh = Even shorter scroll track for early exit
+    <section ref={containerRef} className="relative h-[200vh] bg-[#050505]">
+
+      {/* Sticky Wrapper */}
+      <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden py-12">
+
+        {/* 95% Width Card */}
+        <div className="relative w-[95%] h-full max-h-[90vh] bg-[#0a0a0a] rounded-[3rem] border border-white/5 overflow-hidden flex flex-col md:flex-row">
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay z-0 pointer-events-none" />
+
+          {/* Left: Sticky Title (Inside the card) */}
+          <div className="w-full md:w-1/2 p-12 md:p-16 flex flex-col justify-between relative z-10 bg-gradient-to-r from-[#0a0a0a] to-transparent">
+            <div>
+              <h2 className="text-6xl md:text-8xl tracking-tight leading-[0.9] mb-8 text-white">
+                Our <br />
+                <span className="italic text-neutral-500">Principles</span>
+              </h2>
+              <p className="text-xl text-neutral-400 mb-12 max-w-sm">
+                The core beliefs that guide every line of code we write and every product we ship.
               </p>
+              <a href="#contact" className="inline-flex items-center justify-center px-8 py-4 bg-white text-black rounded-full font-medium hover:bg-orange-500 hover:text-white transition-all duration-300 active:scale-95 group">
+                <span>Start a Project</span>
+                <ArrowUpRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+              </a>
+            </div>
+          </div>
+
+
+
+          <div className="w-full md:w-1/2 relative overflow-hidden">
+            <motion.div
+              style={{ y: yRight }}
+              className="p-12 md:p-16 flex flex-col gap-32"
+            >
+              {principles.map((item, i) => (
+                <div key={i} className="flex flex-col gap-6">
+                  <span className="text-orange-500 font-mono text-sm">0{i + 1}</span>
+                  <h3 className="text-4xl md:text-5xl text-white">{item.title}</h3>
+                  <p className="text-xl text-neutral-400 leading-relaxed max-w-md">
+                    {item.description}
+                  </p>
+                  <div className="w-full h-[1px] bg-white/10" />
+                </div>
+              ))}
+
+              {/* Final Graphic */}
+              <div className="pt-4">
+                <PrinciplesGraphic />
+              </div>
+
+              {/* Removed extra spacer to ensure exact stop */}
+              {/* <div className="h-[20vh]" /> */}
             </motion.div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
