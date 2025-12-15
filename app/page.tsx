@@ -12,6 +12,7 @@ export default function Home() {
       <HeroGravity />
       <ManifestoSection />
 
+
       <AboutSection />
 
       <ServicesSection />

@@ -44,16 +44,16 @@ function BentoItem({ title, description, className, children, index }: BentoItem
 
 export function BentoGridV2() {
     return (
-        <div className="w-full">
+        <div className="w-full flex flex-col">
             {/* Full Width Grid - Taller rows */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-px bg-white/10 border-y border-white/10 w-full auto-rows-[600px]">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-px bg-white/10 border-t border-white/10 w-full auto-rows-[600px]">
 
                 {/* Column 1 */}
                 <BentoItem
                     index={0}
                     title="Agentic AI"
                     description="Autonomous agents that work for you."
-                    className="md:row-span-1 border-r border-white/10 rounded-none"
+                    className="md:row-span-1 border-r border-white/10 rounded-none bg-[#0a0a0a]"
                 >
                     <div className="absolute inset-0 bg-gradient-to-t from-[#ff6b35]/20 to-transparent opacity-50" />
                 </BentoItem>
@@ -63,7 +63,7 @@ export function BentoGridV2() {
                     index={1}
                     title="AI & Machine Learning"
                     description="Custom MLOps pipelines and intelligent model deployment."
-                    className="md:col-span-2 md:row-span-1 border-r border-white/10 rounded-none"
+                    className="md:col-span-2 md:row-span-1 border-r border-white/10 rounded-none bg-[#0a0a0a]"
                 >
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
                     <div className="absolute inset-0 flex items-center justify-center text-neutral-700 font-mono text-sm tracking-widest uppercase">
@@ -76,7 +76,7 @@ export function BentoGridV2() {
                     index={2}
                     title="Mobile Dev"
                     description="Native and cross-platform experiences."
-                    className="md:row-span-1 rounded-none"
+                    className="md:row-span-1 rounded-none bg-[#0a0a0a]"
                 >
                     <div className="absolute inset-0 bg-gradient-to-b from-purple-500/10 to-transparent" />
                 </BentoItem>
@@ -86,27 +86,37 @@ export function BentoGridV2() {
                     index={3}
                     title="Cloud Arch"
                     description="Scalable infrastructure."
-                    className="border-r border-t border-white/10 rounded-none"
+                    className="border-r border-t border-white/10 rounded-none bg-[#0a0a0a]"
                 />
                 <BentoItem
                     index={4}
                     title="Web Dev"
                     description="Future-proof websites."
-                    className="border-r border-t border-white/10 rounded-none"
+                    className="border-r border-t border-white/10 rounded-none bg-[#0a0a0a]"
                 />
                 <BentoItem
                     index={5}
                     title="Automation"
                     description="Streamlining workflows."
-                    className="border-r border-t border-white/10 rounded-none"
+                    className="border-r border-t border-white/10 rounded-none bg-[#0a0a0a]"
                 />
                 <BentoItem
                     index={6}
                     title="Consulting"
                     description="Strategic guidance."
-                    className="border-t border-white/10 rounded-none"
+                    className="border-t border-white/10 rounded-none bg-[#0a0a0a]"
                 />
             </div>
+
+            {/* Footer Row - "And more is coming..." */}
+            <a href="/services" className="w-full border-y border-white/10 p-6 flex items-center justify-between group bg-[#0a0a0a] hover:bg-white/5 transition-colors cursor-pointer relative overflow-hidden">
+                <div className="flex items-center gap-4 mx-auto md:mx-0 md:w-full md:justify-center">
+                    <span className="text-neutral-500 font-medium group-hover:text-white transition-colors uppercase tracking-widest text-sm">
+                        And more is coming...
+                    </span>
+                    <ArrowUpRight className="w-4 h-4 text-neutral-600 group-hover:text-white transition-colors duration-300" />
+                </div>
+            </a>
         </div>
     )
 }

@@ -169,7 +169,7 @@ export function WorkSection() {
                             </AnimatePresence>
 
                             {/* Interactive "View all projects" Button */}
-                            <Link href="/projects" className="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden rounded-full bg-white/5 text-white transition-all hover:bg-white/10">
+                            <Link href="/work" className="group relative inline-flex items-center justify-center px-8 py-3 overflow-hidden rounded-full bg-white/5 text-white transition-all hover:bg-white/10">
                                 {/* Border Pulse Animation */}
                                 <span className="absolute inset-0 rounded-full border border-white/10" />
                                 <span className="absolute inset-0 rounded-full border border-white/0 group-hover:border-orange-500/50 transition-colors duration-500" />

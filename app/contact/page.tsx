@@ -417,47 +417,24 @@ function ContactFAQ() {
   )
 }
 
-// --- 4.5 Flow Section (Transition) ---
-function FlowSection() {
-  return (
-    <section className="py-24 bg-[#050505] border-t border-white/5 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
-
-      <div className="container mx-auto px-6 md:px-12">
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <span className="text-orange-500 font-mono text-xs tracking-[0.3em] uppercase mb-4 block">The Process</span>
-          <h3 className="text-3xl md:text-5xl font-medium tracking-tight text-white">
-            From <span className="text-neutral-500 italic">Intro</span> to <span className="text-neutral-500 italic">Impact</span>.
-          </h3>
-        </div>
-
-        {/* Simple Flow Steps with Arrows */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
-          {[
-            { title: "Discovery", desc: "We map the territory." },
-            { title: "Strategy", desc: "We chart the course." },
-            { title: "Execution", desc: "We build the engine." },
-            { title: "Scale", desc: "We ignite the fuel." }
-          ].map((step, i) => (
-            <div key={i} className="relative group">
-              <div className="mb-6 flex items-center justify-between">
-                <span className="text-6xl font-medium text-neutral-800 group-hover:text-orange-900/50 transition-colors duration-500">
-                  0{i + 1}
-                </span>
-                {i < 3 && <ArrowRight className="text-neutral-700 w-6 h-6 hidden md:block" />}
-              </div>
-              <h4 className="text-xl font-bold text-white mb-2">{step.title}</h4>
-              <p className="text-neutral-400 text-sm leading-relaxed">{step.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// --- 5. Big Card CTA ---
+// --- 5. Big Card CTA (Enhanced with Process Loop) ---
 function ContactCTA() {
+  const [activeStep, setActiveStep] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % 4);
+    }, 2000); // Cycle every 2 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  const steps = [
+    { title: "Discovery", desc: "Mapping the territory." },
+    { title: "Strategy", desc: "Charting the course." },
+    { title: "Execution", desc: "Building the engine." },
+    { title: "Scale", desc: "Igniting the fuel." }
+  ];
+
   return (
     <section className="py-24 bg-[#050505] flex justify-center">
       <div className="w-[98%] bg-neutral-900 rounded-[3rem] border border-white/5 relative overflow-hidden group">
@@ -468,6 +445,56 @@ function ContactCTA() {
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px] mix-blend-screen" />
 
         <div className="relative z-10 py-32 md:py-48 px-6 flex flex-col items-center text-center">
+
+          {/* Process Loop (Integrated) */}
+          <div className="w-full max-w-6xl mb-24 flex flex-col items-center">
+            <span className="text-orange-500 font-mono text-xs tracking-[0.3em] uppercase mb-12 block opacity-70">The Process</span>
+
+            <div className="w-full grid grid-cols-1 md:grid-cols-4 gap-6 mx-auto">
+              {steps.map((step, i) => {
+                const isActive = activeStep === i;
+                return (
+                  <div
+                    key={i}
+                    className={cn(
+                      "relative p-6 rounded-2xl border transition-all duration-500 flex flex-col items-center text-center",
+                      isActive
+                        ? "bg-white/5 border-orange-500/30 shadow-[0_0_30px_-5px_rgba(249,115,22,0.1)] scale-105"
+                        : "bg-transparent border-transparent opacity-50 scale-100"
+                    )}
+                  >
+                    <div className="flex items-center justify-between w-full mb-4">
+                      <span className={cn(
+                        "text-4xl font-medium transition-colors duration-300",
+                        isActive ? "text-orange-500" : "text-neutral-700"
+                      )}>
+                        0{i + 1}
+                      </span>
+                      {i < 3 && (
+                        <motion.div
+                          animate={isActive ? { x: [0, 5, 0] } : { x: 0 }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                          className="hidden md:block"
+                        >
+                          <ArrowRight className={cn(
+                            "w-5 h-5 transition-all duration-500",
+                            isActive ? "text-orange-500" : "text-neutral-800"
+                          )} />
+                        </motion.div>
+                      )}
+                    </div>
+                    <h4 className={cn("text-lg font-bold mb-1 transition-colors", isActive ? "text-white" : "text-neutral-400")}>
+                      {step.title}
+                    </h4>
+                    <p className="text-sm text-neutral-500">{step.desc}</p>
+
+                    {/* Active Progress Bar Removed */}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
           <h2 className="text-5xl md:text-8xl font-medium tracking-tighter text-white mb-12">
             Ready to <span className="text-neutral-500 italic">Scale?</span>
           </h2>
@@ -497,7 +524,6 @@ export default function ContactPage() {
         <ContactStats />
         <ContactBento />
         <ContactFAQ />
-        <FlowSection />
         <ContactCTA />
       </main>
     </div>
